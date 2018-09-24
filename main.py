@@ -9,7 +9,7 @@ while True:
     print(f'1) Agregar un nuevo estudiante')
     print(f'2) Consultar la información de un estudiante')
     print(f'3) Eliminar un estudiante')
-    print(f'4) Agregar un curso')
+    print(f'4) Listar estudiantes')
     print(f'5) Salir')
     seleccion = int(input(f'{Fore.LIGHTYELLOW_EX}Por favor, ingrese el numero correspondiente a la tarea que desea realizar: {Style.RESET_ALL}'))
     if seleccion == 1:
@@ -23,10 +23,11 @@ while True:
         r.set(f'estudiante:{carnet}:ponderado', ponderado)
         r.set(f'estudiante:{carnet}:cursos', cursos)
         r.incr('universidad:cantidadEstudiantes')
+        r.zadd("estudiantes:ponderado:index", carnet, ponderado)
         for x in cursos:
             r.decr(f'curso:{x}:cupo')
     elif seleccion == 2:
-        carnet = input(f'{Fore.LIGHTYELLOW_EX}Ingrese el número de carnet del estudiante:')
+        carnet = input(f'{Fore.LIGHTYELLOW_EX}Ingrese el número de carnet del estudiante:{Style.RESET_ALL}')
         if r.exists(f'estudiante:{carnet}:nombre'):
             print(f'{Fore.LIGHTGREEN_EX}Nombre:      {Style.RESET_ALL}' + str(r.get(f'estudiante:{carnet}:nombre').decode("utf-8")))
             print(f'{Fore.LIGHTGREEN_EX}Carrera:     {Style.RESET_ALL}' + str(r.get(f'estudiante:{carnet}:carrera').decode("utf-8")))
@@ -48,13 +49,12 @@ while True:
             r.decr('universidad:cantidadEstudiantes')
             print(f'{Fore.LIGHTGREEN_EX}¡Se ha eliminado al estudiante con exito!{Style.RESET_ALL}')
     elif seleccion == 4:
-        siglas = input(f'{Fore.LIGHTYELLOW_EX}Ingrese las siglas del curso y su respectivo semestre (curso-semestre):{Style.RESET_ALL}')
-        nombre = input(f'{Fore.LIGHTYELLOW_EX}Ingrese el nombre del curso:{Style.RESET_ALL}')
-        profesor = input(f'{Fore.LIGHTYELLOW_EX}Ingrese la ingrese el profesor del curso:{Style.RESET_ALL}')
-        cupo = float(input(f'{Fore.LIGHTYELLOW_EX}Ingrese el cupo del curso:{Style.RESET_ALL}'))
-        r.set(f'curso:{siglas}:nombre', nombre)
-        r.set(f'curso:{siglas}:carrera', profesor)
-        r.set(f'curso:{siglas}:ponderado', cupo)
+        estudiantes_ordenados = r.zrange("estudiantes:ponderado:index", 0, -1)
+        for x in estudiantes_ordenados:
+                carnet = x.decode("utf-8")
+                ponderado = float(r.get(f"estudiante:{carnet}:ponderado"))
+                nombre  = r.get(f"estudiante:{carnet}:nombre").decode("utf-8")
+                print(f"{nombre}: {ponderado}")
     elif seleccion == 5:
         sys.exit()
     else:
