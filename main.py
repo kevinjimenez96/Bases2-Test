@@ -17,10 +17,14 @@ while True:
         nombre = input(f'{Fore.LIGHTYELLOW_EX}Ingrese el nombre del estudiante:{Style.RESET_ALL}')
         carrera = input(f'{Fore.LIGHTYELLOW_EX}Ingrese la carrera a la que pertenece el estudiante:{Style.RESET_ALL}')
         ponderado = float(input(f'{Fore.LIGHTYELLOW_EX}Ingrese el ponderado del estudiante:{Style.RESET_ALL}'))
-        #cursos = [x for x in input(f'{Fore.LIGHTYELLOW_EX}Ingrese los cursos a los que el estudiante pertenece:{Style.RESET_ALL}').split()]
+        cursos = [x for x in input(f'{Fore.LIGHTYELLOW_EX}Ingrese los cursos a los que el estudiante pertenece:{Style.RESET_ALL}').split()]
         r.set(f'estudiante:{carnet}:nombre', nombre)
         r.set(f'estudiante:{carnet}:carrera', carrera)
         r.set(f'estudiante:{carnet}:ponderado', ponderado)
+        r.set(f'estudiante:{carnet}:cursos', cursos)
+        r.incr('universidad:cantidadEstudiantes')
+        for x in cursos:
+            r.decr(f'curso:{x}:cupo')
     elif seleccion == 2:
         carnet = input(f'{Fore.LIGHTYELLOW_EX}Ingrese el número de carnet del estudiante:')
         if r.exists(f'estudiante:{carnet}:nombre'):
@@ -33,9 +37,15 @@ while True:
         if input(f'{Fore.RED}Esta operación no es reversible, ¿Desea continuar? {Style.RESET_ALL}S/n: ') == 'S':
             carnet = input(f'{Fore.RED}Ingrese el número de carnet del estudiante:{Style.RESET_ALL}')
             pattern = r'estudiante:{0}:*'.format(carnet)
+            cursos = r.get(f'estudiante:{carnet}:cursos')
             c, estudiante_keys = r.scan(0, pattern)
+            for x in cursos:
+                r.incr(f'curso:{x}:cupo')
+
             for x in estudiante_keys:
                 r.delete(x)
+                
+            r.decr('universidad:cantidadEstudiantes')
             print(f'{Fore.LIGHTGREEN_EX}¡Se ha eliminado al estudiante con exito!{Style.RESET_ALL}')
     elif seleccion == 4:
         siglas = input(f'{Fore.LIGHTYELLOW_EX}Ingrese las siglas del curso y su respectivo semestre (curso-semestre):{Style.RESET_ALL}')
