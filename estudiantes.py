@@ -1,3 +1,5 @@
+import redis
+
 r = redis.Redis(host='localhost', port=6379, db=0)
 r.set(f'estudiante:b45698:nombre', "David Ramirez")
 r.set(f'estudiante:b45698:carrera', "Artes Plasticas")
@@ -17,7 +19,7 @@ r.set(f'estudiante:b75486:ponderado', 10)
 r.incr('universidad:cantidadEstudiantes')
 r.zadd("estudiantes:ponderado:index", "b75486", 10)
 
-r.set(f'estudiante:b59218:nombre', Kevin Jimenez")
+r.set(f'estudiante:b59218:nombre',"Kevin Jimenez")
 r.set(f'estudiante:b59218:carrera', "Informatica")
 r.set(f'estudiante:b59218:ponderado', 8)
 r.incr('universidad:cantidadEstudiantes')
