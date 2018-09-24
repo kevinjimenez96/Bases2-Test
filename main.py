@@ -44,7 +44,7 @@ while True:
 
             for x in estudiante_keys:
                 r.delete(x)
-                
+
             r.decr('universidad:cantidadEstudiantes')
             print(f'{Fore.LIGHTGREEN_EX}¡Se ha eliminado al estudiante con exito!{Style.RESET_ALL}')
     elif seleccion == 4:
