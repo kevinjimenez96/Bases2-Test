@@ -1,39 +1,42 @@
 import redis
 import sys
-import re
+from colorama import Fore
+from colorama import Style
 
 r = redis.Redis(host='localhost', port=6379, db=0)
 while True:
-    print('¡Bienvenido al sistema de información de estudiantes!')
-    print('1) Agregar un nuevo estudiante')
-    print('2) Consultar la información de un estudiante')
-    print('3) Eliminar un estudiante')
-    print('4) Salir')
-    seleccion = int(input('Por favor, ingrese el numero correspondiente a la tarea que desea realizar: '))
+    print(f'{Style.BRIGHT}¡Bienvenido al sistema de información de estudiantes!{Style.RESET_ALL}')
+    print(f'1) Agregar un nuevo estudiante')
+    print(f'2) Consultar la información de un estudiante')
+    print(f'3) Eliminar un estudiante')
+    print(f'4) Salir')
+    seleccion = int(input(f'{Fore.LIGHTYELLOW_EX}Por favor, ingrese el numero correspondiente a la tarea que desea realizar: {Style.RESET_ALL}'))
     if seleccion == 1:
-        carnet = input('Ingrese el número de carnet del estudiante:')
-        nombre = input('Ingrese el nombre del estudiante:')
-        carrera = input('Ingrese la carrera a la que pertenece el estudiante:')
-        ponderado = float(input('Ingrese el ponderado del estudiante:'))
+        carnet = input(f'{Fore.LIGHTYELLOW_EX}Ingrese el número de carnet del estudiante:{Style.RESET_ALL}')
+        nombre = input(f'{Fore.LIGHTYELLOW_EX}Ingrese el nombre del estudiante:{Style.RESET_ALL}')
+        carrera = input(f'{Fore.LIGHTYELLOW_EX}Ingrese la carrera a la que pertenece el estudiante:{Style.RESET_ALL}')
+        ponderado = float(input(f'{Fore.LIGHTYELLOW_EX}Ingrese el ponderado del estudiante:{Style.RESET_ALL}'))
         r.set(f'estudiante:{carnet}:nombre', nombre)
         r.set(f'estudiante:{carnet}:carrera', carrera)
         r.set(f'estudiante:{carnet}:ponderado', ponderado)
     elif seleccion == 2:
-        carnet = input('Ingrese el número de carnet del estudiante:')
-        if r.exists(carnet):
-            print(str(r.get(f'estudiante:{carnet}:nombre').decode("utf-8") ))
-            print(str(r.get(f'estudiante:{carnet}:carrera').decode("utf-8") ))
-            print(float(r.get(f'estudiante:{carnet}:ponderado')))
+        carnet = input(f'{Fore.LIGHTYELLOW_EX}Ingrese el número de carnet del estudiante:')
+        if r.exists(f'estudiante:{carnet}:nombre'):
+            print(f'{Fore.LIGHTGREEN_EX}Nombre:      {Style.RESET_ALL}' + str(r.get(f'estudiante:{carnet}:nombre').decode("utf-8")))
+            print(f'{Fore.LIGHTGREEN_EX}Carrera:     {Style.RESET_ALL}' + str(r.get(f'estudiante:{carnet}:carrera').decode("utf-8")))
+            print(f'{Fore.LIGHTGREEN_EX}Ponderado:   {Style.RESET_ALL}' + str(float(r.get(f'estudiante:{carnet}:ponderado'))))
         else:
-            print('\033[93mIngrese que el carnet sea valido y/o haya sido agregado al sistema anteriormente.\033[0m')
-        input('Oprima enter para continuar:')
+            print(f'{Fore.LIGHTRED_EX}Ingrese que el carnet sea valido y/o haya sido agregado al sistema anteriormente.{Style.RESET_ALL}')
     elif seleccion == 3:
-        carnet = input('Ingrese el número de carnet del estudiante:')
-        pattern = r'estudiante:{0}:*'.format(carnet)
-        c, estudiante_keys = r.scan(0, pattern)
-        for x in estudiante_keys:
-            r.delete(x)
+        if input(f'{Fore.RED}Esta operación no es reversible, ¿Desea continuar? {Style.RESET_ALL}S/n: ') == 'S':
+            carnet = input(f'{Fore.RED}Ingrese el número de carnet del estudiante:{Style.RESET_ALL}')
+            pattern = r'estudiante:{0}:*'.format(carnet)
+            c, estudiante_keys = r.scan(0, pattern)
+            for x in estudiante_keys:
+                r.delete(x)
+            print(f'{Fore.LIGHTGREEN_EX}¡Se ha eliminado al estudiante con exito!{Style.RESET_ALL}')
     elif seleccion == 4:
         sys.exit()
     else:
         print('Inserte un número valido por favor.')
+    input('Oprima enter para continuar:')
